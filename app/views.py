@@ -60,14 +60,6 @@ def create_user_profile(sender, instance, created, **kwargs):
         Profile.objects.create(user=instance)
 
 
-from django.shortcuts import render, redirect, get_object_or_404
-from .forms import PostForm
-from .models import Post, Profile
-from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
-
-
-from django.db.models import Prefetch
 
 @login_required
 def profile_view(request, username):
