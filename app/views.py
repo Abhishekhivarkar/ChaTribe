@@ -6,7 +6,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
-# from app.models import Comment, CommentForm, Post, PostForm
+
 from .models import Like, Profile, Post 
 from .models import Post, Comment, Profile
 from .forms import PostForm, CommentForm, RegisterForm, ProfileImageForm
@@ -22,13 +22,13 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.db.models.signals import post_save
 from .models import UserProfile
-from django.db.models.signals import post_save
+
 from django.dispatch import receiver
 
 from .models import Post
-# @method_decorator(csrf_protect, name='dispatch')
+
 def home_view(request):
-    posts = Post.objects.all().order_by('-created_at')  # newest first
+    posts = Post.objects.all().order_by('-created_at')  
     return render(request, 'home.html', {'posts': posts})
 
 
@@ -40,9 +40,9 @@ def register_view(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            form.save()  # saves the new user
+            form.save()  
             messages.success(request, 'Registration successful. You can now log in.')
-            return redirect('login')  # or wherever you want to redirect after registration
+            return redirect('login')  
     else:
         form = UserCreationForm()
     print("DEBUG CSRF TOKEN:", get_token(request))  
@@ -206,7 +206,7 @@ def follow_user(request, username):
     if request.method == 'POST':
         try:
             user_to_follow = User.objects.get(username=username)
-            profile_to_follow = user_to_follow.profile  # if you used related_name='profile'
+            profile_to_follow = user_to_follow.profile 
             current_profile = request.user.profile
 
             if current_profile in profile_to_follow.followers.all():
@@ -247,7 +247,7 @@ def upload_reel(request):
             reel = form.save(commit=False)
             reel.user = request.user
             reel.save()
-            return redirect('reels_feed')  # or wherever you want
+            return redirect('reels_feed')  
     else:
         form = ReelForm()
     return render(request, 'upload_reel.html', {'form': form})
@@ -256,7 +256,7 @@ def reels_feed(request):
     reels = Reel.objects.all().order_by('-created_at')
     return render(request, 'reels_feed.html', {'reels': reels})
 
-from .models import Reel  # Make sure this is already imported at the top
+from .models import Reel 
 
 def reels_feed(request):
     reels = Reel.objects.all().order_by('-created_at')
