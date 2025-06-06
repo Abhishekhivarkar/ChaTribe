@@ -6,7 +6,12 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
-
+from django.shortcuts import render, redirect, get_object_or_404
+from .forms import PostForm
+from .models import Post, Profile
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+from django.db.models import Prefetch
 from .models import Like, Profile, Post 
 from .models import Post, Comment, Profile
 from .forms import PostForm, CommentForm, RegisterForm, ProfileImageForm
@@ -22,9 +27,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.db.models.signals import post_save
 from .models import UserProfile
-
 from django.dispatch import receiver
-
 from .models import Post
 
 def home_view(request):
