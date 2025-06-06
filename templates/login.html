@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+  .login-container {
+    max-width: 400px;
+    margin: 60px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e3e3e3;
+  }
+
+  .login-title {
+    font-size: 28px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+  }
+
+  .form-control {
+    border-radius: 8px;
+  }
+
+  .btn-login {
+    width: 100%;
+    border-radius: 8px;
+    padding: 10px;
+    font-weight: 600;
+  }
+
+  .form-text {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 14px;
+  }
+</style>
+
+<div class="login-container">
+  <h2 class="login-title">Login to SocialSite</h2>
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="mb-3">
+        {{ field.label_tag }} 
+        {{ field }}
+        {% if field.errors %}
+          <div class="text-danger small">{{ field.errors|striptags }}</div>
+        {% endif %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-success btn-login">Login</button>
+  </form>
+
+  <div class="form-text">
+    Don't have an account? <a href="{% url 'register' %}">Register here</a>
+  </div>
+</div>
+{% endblock %}

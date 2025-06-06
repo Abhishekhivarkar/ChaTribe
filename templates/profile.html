@@ -1,0 +1,695 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+  :root {
+    --primary-color: #3897f0;
+    --secondary-color: #fafafa;
+    --border-color: #dbdbdb;
+    --text-primary: #262626;
+    --text-secondary: #8e8e8e;
+    --white: #ffffff;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .profile-section {
+    max-width: 935px;
+    margin: 0 auto;
+    padding: 30px 20px 60px;
+  }
+  
+  .profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 0;
+    margin-bottom: 30px;
+    position: relative;
+  }
+  
+  .profile-image-container {
+    position: relative;
+    margin-bottom: 20px;
+  }
+  
+  .profile-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+  }
+  
+  .profile-username {
+    font-size: 28px;
+    font-weight: 300;
+    margin-bottom: 15px;
+    color: var(--text-primary);
+    letter-spacing: 0.5px;
+  }
+  
+  .profile-bio {
+    max-width: 450px;
+    text-align: center;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    padding: 0 20px;
+  }
+  
+  .posts-section {
+    margin-top: 50px;
+  }
+  
+  .section-title {
+    font-size: 20px;
+    font-weight: 400;
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+  }
+  
+  .section-title:after {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 1px;
+    background: var(--border-color);
+    margin: 15px auto 0;
+  }
+  
+  .post-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(293px, 1fr));
+    gap: 28px;
+    margin-bottom: 50px;
+  }
+  
+  .post-card {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: var(--transition);
+    position: relative;
+  }
+  
+  .post-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  }
+  
+  .post-image {
+    width: 100%;
+    height: 293px;
+    object-fit: cover;
+    display: block;
+  }
+  
+  .post-caption {
+    padding: 15px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-primary);
+    border-top: 1px solid var(--border-color);
+  }
+  
+  .post-actions {
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border-color);
+  }
+  
+  .view-btn {
+    background: transparent;
+    color: var(--primary-color);
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: var(--transition);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .view-btn:hover {
+    background: rgba(56, 151, 240, 0.1);
+  }
+  
+  .empty-posts {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 16px;
+    padding: 60px 0;
+    border: 1px dashed var(--border-color);
+    border-radius: 8px;
+    margin: 20px 0;
+  }
+  
+  .upload-form {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 30px;
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+  }
+  
+  .form-title {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 25px;
+    text-align: center;
+    color: var(--text-primary);
+    position: relative;
+    padding-bottom: 15px;
+  }
+  
+  .form-title:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 2px;
+    background: var(--primary-color);
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 14px;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    transition: var(--transition);
+  }
+  
+  .form-control:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(56, 151, 240, 0.2);
+  }
+  
+  textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+  }
+  
+  .submit-btn {
+    background: var(--primary-color);
+    color: var(--white);
+    border: none;
+    padding: 12px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: var(--transition);
+    width: 100%;
+    margin-top: 10px;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+  }
+  
+  .submit-btn:hover {
+    background: #2684f0;
+    transform: translateY(-1px);
+  }
+  
+  .file-upload {
+    position: relative;
+    overflow: hidden;
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 30px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    background: var(--secondary-color);
+  }
+  
+  .file-upload:hover {
+    border-color: var(--primary-color);
+    background: rgba(56, 151, 240, 0.03);
+  }
+  
+  .file-upload input[type="file"] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+  
+  .file-upload-label {
+    display: block;
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+  }
+  
+  .file-upload-icon {
+    font-size: 28px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+  
+  .file-upload-success {
+    border-color: #10b981;
+    background: rgba(16, 185, 129, 0.05);
+  }
+  
+  .file-upload-success .file-upload-icon {
+    color: #10b981;
+  }
+  
+  .file-upload-success .file-upload-label {
+    color: #10b981;
+  }
+  
+  .stats-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 20px;
+  }
+  
+  .stat-item {
+    text-align: center;
+  }
+  
+  .stat-number {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  
+  .stat-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  @media (max-width: 768px) {
+    .profile-section {
+      padding: 20px 15px 40px;
+    }
+    
+    .profile-header {
+      padding: 30px 0;
+    }
+    
+    .profile-image {
+      width: 120px;
+      height: 120px;
+    }
+    
+    .profile-username {
+      font-size: 24px;
+    }
+    
+    .post-grid {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    
+    .post-image {
+      height: 200px;
+    }
+    
+    .upload-form {
+      padding: 20px;
+      margin: 30px auto;
+    }
+    
+    .stats-container {
+      gap: 20px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .profile-image {
+      width: 100px;
+      height: 100px;
+    }
+    
+    .profile-username {
+      font-size: 22px;
+    }
+    
+    .post-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .post-image {
+      height: 250px;
+    }
+  }
+  
+  /* Animation for empty state */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .empty-posts {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+
+  .profile-actions {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.action-btn {
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.follow-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+}
+
+.follow-btn:hover {
+  background: #2684f0;
+}
+
+.unfollow-btn {
+  background: var(--white);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.unfollow-btn:hover {
+  background: var(--secondary-color);
+}
+
+.message-btn {
+  background: var(--white);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.message-btn:hover {
+  background: var(--secondary-color);
+}
+
+</style>
+
+<div class="profile-section">
+  <div class="profile-header">
+    <div class="profile-image-container">
+      <img src="{{ profile.profile_image.url }}" class="profile-image" alt="{{ profile.user.username }}'s profile picture">
+    </div>
+    
+    {% if user == profile.user %}
+    <form method="post" enctype="multipart/form-data" style="margin-bottom: 25px; text-align: center; width: 100%; max-width: 400px;">
+      {% csrf_token %}
+      <div class="file-upload" id="profileUpload">
+        <div class="file-upload-icon">
+          <i class="fas fa-camera"></i>
+        </div>
+        <span class="file-upload-label">Update profile photo</span>
+        {{ profile_form.profile_image }}
+      </div>
+      <button type="submit" class="submit-btn" style="margin-top: 15px;">Save Changes</button>
+    </form>
+    {% endif %}
+    
+
+    {% if user != profile.user %}
+<div class="profile-actions" style="margin-bottom: 20px;">
+  <form method="post" action="{% url 'follow_user' profile.user.username %}">
+    {% csrf_token %}
+    {% if is_following %}
+      <button type="submit" class="action-btn unfollow-btn">
+        <i class="fas fa-user-minus"></i> Unfollow
+      </button>
+    {% else %}
+      <button type="submit" class="action-btn follow-btn">
+        <i class="fas fa-user-plus"></i> Follow
+      </button>
+    {% endif %}
+  </form>
+  <a href="#" class="action-btn message-btn">
+    <i class="fas fa-envelope"></i> Message
+  </a>
+</div>
+{% endif %}
+
+    <h1 class="profile-username">@{{ profile.user.username }}</h1>
+    
+    <div class="stats-container">
+      <div class="stat-item">
+        <div class="stat-number">{{ posts.count }}</div>
+        <div class="stat-label">Posts</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">{{ profile.get_followers_count }}</div>
+        <div class="stat-label">Followers</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">{{ profile.get_following_count }}</div>
+        <div class="stat-label">Following</div>
+      </div>
+    </div>
+    
+    {% if profile.bio %}
+      <p class="profile-bio">{{ profile.bio }}</p>
+    {% endif %}
+  </div>
+
+  <div class="posts-section">
+    <h2 class="section-title">Your Posts</h2>
+
+    {% if posts %}
+      <div class="post-grid">
+        {% for post in posts %}
+          <div class="post-card">
+            <img src="{{ post.image.url }}" class="post-image" alt="Post by {{ profile.user.username }}">
+            <div class="post-caption">{{ post.caption|truncatechars:120 }}</div>
+            
+            <div class="post-actions">
+              <div class="view-btn">
+                <i class="fas fa-heart"></i> {{ post.likes.count }}
+              </div>
+              <a href="{% url 'post_detail' post.id %}" class="view-btn">
+                <i class="fas fa-eye"></i> View
+              </a>
+            </div>
+
+            {% if post.comments.count > 0 %}
+              <div style="padding: 12px 15px; border-top: 1px solid var(--border-color); font-size: 13px; color: var(--text-primary); background: var(--secondary-color);">
+                <div style="font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">
+                  <i class="fas fa-comment" style="margin-right: 5px;"></i>
+                  {{ post.comments.count }} Comment{{ post.comments.count|pluralize }}
+                </div>
+                {% for comment in post.comments.all|slice:":2" %}
+                  <div style="margin-bottom: 6px;">
+                    <strong style="color: var(--text-primary);">@{{ comment.user.username }}</strong>: 
+                    <span style="color: var(--text-primary);">{{ comment.text|truncatewords:10 }}</span>
+                  </div>
+                {% endfor %}
+                {% if post.comments.count > 2 %}
+                  <div style="font-size: 12px; color: var(--text-secondary); margin-top: 5px;">
+                    + {{ post.comments.count|add:"-2" }} more comment{{ post.comments.count|add:"-2"|pluralize }}
+                  </div>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-posts">
+        <i class="fas fa-camera" style="font-size: 24px; margin-bottom: 10px; color: var(--text-secondary);"></i>
+        <div>No posts yet</div>
+        {% if user == profile.user %}
+          <div style="margin-top: 10px; font-size: 14px;">Share your first photo above</div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+  {% if user == profile.user %}
+    <div class="upload-form">
+      <h3 class="form-title">Create New Post</h3>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="id_image">Upload Photo</label>
+          <div class="file-upload" id="postUpload">
+            <div class="file-upload-icon">
+              <i class="fas fa-image"></i>
+            </div>
+            <span class="file-upload-label">Drag & drop or click to browse</span>
+            {{ form.image }}
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="id_caption">Caption</label>
+          {{ form.caption }}
+        </div>
+        <button type="submit" class="submit-btn">
+          <i class="fas fa-share-square" style="margin-right: 8px;"></i> Share Post
+        </button>
+      </form>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Profile image upload
+    const profileUpload = document.getElementById('profileUpload');
+    const profileFileInput = profileUpload ? profileUpload.querySelector('input[type="file"]') : null;
+    
+    if (profileFileInput) {
+      profileFileInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+          const fileName = this.files[0].name.length > 20 ? 
+            this.files[0].name.substring(0, 17) + '...' : this.files[0].name;
+          const label = profileUpload.querySelector('.file-upload-label');
+          label.textContent = fileName;
+          label.style.color = '#10b981';
+          profileUpload.querySelector('.file-upload-icon').innerHTML = '<i class="fas fa-check-circle"></i>';
+          profileUpload.classList.add('file-upload-success');
+        }
+      });
+    }
+    
+    // Post image upload
+    const postUpload = document.getElementById('postUpload');
+    const postFileInput = postUpload ? postUpload.querySelector('input[type="file"]') : null;
+    
+    if (postFileInput) {
+      postFileInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+          const fileName = this.files[0].name.length > 20 ? 
+            this.files[0].name.substring(0, 17) + '...' : this.files[0].name;
+          const label = postUpload.querySelector('.file-upload-label');
+          label.textContent = fileName;
+          label.style.color = '#10b981';
+          postUpload.querySelector('.file-upload-icon').innerHTML = '<i class="fas fa-check-circle"></i>';
+          postUpload.classList.add('file-upload-success');
+        }
+      });
+      
+      // Drag and drop effects
+      postUpload.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.style.borderColor = 'var(--primary-color)';
+        this.style.backgroundColor = 'rgba(56, 151, 240, 0.05)';
+        this.querySelector('.file-upload-icon').innerHTML = '<i class="fas fa-cloud-upload-alt"></i>';
+        this.querySelector('.file-upload-label').textContent = 'Drop to upload';
+      });
+      
+      postUpload.addEventListener('dragleave', function() {
+        this.style.borderColor = 'var(--border-color)';
+        this.style.backgroundColor = 'var(--secondary-color)';
+        this.querySelector('.file-upload-icon').innerHTML = '<i class="fas fa-image"></i>';
+        this.querySelector('.file-upload-label').textContent = 'Drag & drop or click to browse';
+      });
+    }
+    
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+  });
+
+
+  // AJAX for follow/unfollow functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const followForms = document.querySelectorAll('form[action*="follow_user"]');
+
+  followForms.forEach(form => {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const url = this.getAttribute('action');
+      const method = this.getAttribute('method');
+
+      fetch(url, {
+        method: method,
+        body: formData,
+        headers: {
+          'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          const button = this.querySelector('button');
+          const isFollowing = button.classList.contains('unfollow-btn');
+
+          if (isFollowing) {
+            button.innerHTML = '<i class="fas fa-user-plus"></i> Follow';
+            button.className = 'action-btn follow-btn';
+          } else {
+            button.innerHTML = '<i class="fas fa-user-minus"></i> Unfollow';
+            button.className = 'action-btn unfollow-btn';
+          }
+
+          // Update follower count
+          const followerCountElement = document.querySelector('.stat-item:nth-child(2) .stat-number');
+          if (followerCountElement) {
+            const currentCount = parseInt(followerCountElement.textContent);
+            followerCountElement.textContent = isFollowing ? currentCount - 1 : currentCount + 1;
+          }
+        }
+      })
+      .catch(error => console.error('Error:', error));
+    });
+  });
+});
+
+</script>
+{% endblock %}

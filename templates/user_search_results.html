@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container my-4">
+  <h2>Search Results for "{{ query }}"</h2>
+  <hr>
+  {% if users %}
+    <ul class="list-group">
+      {% for user in users %}
+        <li class="list-group-item">
+          <a href="{% url 'profile' user.username %}">{{ user.username }}</a>
+          {% if user.first_name or user.last_name %}
+            - {{ user.first_name }} {{ user.last_name }}
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No users found matching your query.</p>
+  {% endif %}
+</div>
+{% endblock %}

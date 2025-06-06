@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container max-w-2xl mx-auto px-4 py-8">
+  <!-- Post Card -->
+  <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200 mb-8">
+    
+    <!-- Post Header -->
+    <div class="flex items-center p-4 border-b border-gray-100">
+      <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
+        <img src="{{ post.author.profile.profile_image.url }}" alt="Profile picture" class="w-full h-full object-cover">
+      </div>
+      <div>
+        <h3 class="font-semibold text-gray-900">{{ post.author.username }}</h3>
+        <p class="text-sm text-gray-500">{{ post.created_at|date:"F j, Y" }}</p>
+      </div>
+    </div>
+
+    <!-- Post Image -->
+<!-- Post Image -->
+<div class="bg-gray-100 overflow-hidden" style="max-height: 400px;">
+  <img src="{{ post.image.url }}" alt="Post image"
+       class="w-full h-full object-cover rounded-t-md"
+       style="object-fit: cover; max-height: 400px;">
+</div>
+
+
+    
+
+
+    <!-- Post Content -->
+    <div class="p-4">
+      <p class="text-gray-800 text-sm mb-2">{{ post.caption }}</p>
+
+      <!-- Like Button -->
+      {% if user.is_authenticated %}
+        <form method="post" action="{% url 'toggle_like' post.id %}" class="inline-block">
+          {% csrf_token %}
+          {% if liked %}
+            <button type="submit" class="text-red-500 font-medium hover:underline">❤️ Unlike</button>
+          {% else %}
+            <button type="submit" class="text-blue-500 font-medium hover:underline">♡ Like</button>
+          {% endif %}
+        </form>
+      {% else %}
+        <p class="text-sm"><a href="{% url 'login' %}" class="text-blue-500 hover:underline">Log in</a> to like this post.</p>
+      {% endif %}
+
+      <!-- Like Count -->
+      <p class="text-sm text-gray-500 mt-1">{{ post.like_set.count }} {{ post.like_set.count|pluralize:"Like,Likes" }}</p>
+    </div>
+  </div>
+
+  <!-- Comments Section -->
+  <div class="bg-white rounded-2xl shadow border border-gray-200 p-4">
+    <h4 class="text-lg font-semibold mb-4">Comments</h4>
+
+    {% for comment in comments %}
+      <div class="border-b border-gray-100 pb-2 mb-2">
+        <p class="text-sm"><strong>{{ comment.user.username }}</strong>: {{ comment.text }}</p>
+        <p class="text-xs text-gray-400">{{ comment.created_at|timesince }} ago</p>
+      </div>
+    {% empty %}
+      <p class="text-sm text-gray-500">No comments yet.</p>
+    {% endfor %}
+
+    {% if user.is_authenticated %}
+      <form method="post" class="mt-4">
+        {% csrf_token %}
+        {{ comment_form.as_p }}
+        <button id='add-comment' type="submit" class="mt-2 px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600" >Add Comment</button>
+      </form>
+    {% else %}
+      <p class="text-sm mt-4"><a href="{% url 'login' %}" class="text-blue-500 hover:underline">Log in</a> to comment.</p>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  #add-comment{
+    background-color:red;
+  }
+  /* Styling comment input */
+  #id_text {
+    width: 100%;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.875rem;
+    background-color: #f9fafb;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  #id_text:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  }
+</style>
+{% endblock %}

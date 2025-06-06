@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+  .reel-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 360px; /* mimics phone screen width */
+    aspect-ratio: 9 / 16; /* vertical video ratio like Instagram Reels */
+    background: black;
+    overflow: hidden;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0; /* space for caption */
+    margin-bottom: 2rem;
+  }
+
+  .reel-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* fills the container nicely */
+    border-radius: 20px;
+    background: black;
+  }
+
+  .reel-wrapper p {
+    margin: 8px 0 0 0;
+    color: white;
+    font-size: 14px;
+    text-align: center;
+    padding: 0 10px;
+    word-break: break-word;
+  }
+
+  /* Center the reels feed container */
+  .reels-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+</style>
+
+<h2 class="mb-4 text-center">Reels Feed</h2>
+
+<div class="reels-container">
+  {% for reel in reels %}
+  <div class="reel-wrapper">
+    <video class="reel-video" controls>
+      <source src="{{ reel.video.url }}" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <p>{{ reel.caption }}</p>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}
