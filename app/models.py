@@ -1,7 +1,7 @@
 
 from django.contrib.auth.models import User
 from django.db import models
- # ✅ Correct
+
 
 
 class Profile(models.Model):
@@ -21,18 +21,7 @@ class Profile(models.Model):
 
     def get_following_count(self):
         return self.following.count()
-# class UserProfile(models.Model):
-#     user = models.OneToOneField(User, on_delete=models.CASCADE)
-#     followers = models.ManyToManyField('self', symmetrical=False, related_name='following', blank=True)
-#     profile_image = models.ImageField(upload_to='profile_images/')
-#     bio = models.TextField(blank=True)
-#     followers = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='following')
-    
-#     def get_followers_count(self):
-#         return self.followers.count()
-    
-#     def get_following_count(self):
-#         return self.following.count()
+
 
 
 class UserProfile(models.Model):
@@ -40,7 +29,7 @@ class UserProfile(models.Model):
     profile_image = models.ImageField(upload_to='profile_images/')
     bio = models.TextField(blank=True)
     
-    # ✅ Define followers only once!
+    #  Define followers only once!
     followers = models.ManyToManyField(
         'self',
         symmetrical=False,
@@ -70,17 +59,10 @@ class Like(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-# class Comment(models.Model):
-#     post = models.ForeignKey(Post, on_delete=models.CASCADE)
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     text = models.TextField()
-#     created_at = models.DateTimeField(auto_now_add=True)
 
-#     def __str__(self):
-#         return f"{self.user.username} on {self.post.id}"
     
 class Comment(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')  # ✅ fix
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')  
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
