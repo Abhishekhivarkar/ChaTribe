@@ -1,66 +1,55 @@
-# from cProfile import Profile
-from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib.auth.forms import UserCreationForm
-from django import forms
-from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
-from django.urls import reverse_lazy
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import PostForm
-from .models import Post, Profile
-from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
-from django.db.models import Prefetch
-from .models import Like, Profile, Post 
-from .models import Post, Comment, Profile
-from .forms import PostForm, CommentForm, RegisterForm, ProfileImageForm
-from django.contrib.auth.views import LoginView
-from .forms import LoginForm
-from django.shortcuts import render, redirect
-from .forms import RegisterForm
+from django.contrib import messages
 from django.contrib.auth import authenticate, login
-from django.views.decorators.csrf import csrf_protect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+from django.contrib.auth.views import LoginView
+from django.db.models import Q, Prefetch
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.urls import reverse_lazy
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.utils.decorators import method_decorator
 from django.middleware.csrf import get_token
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-from django.db.models.signals import post_save
-from .models import UserProfile
-from django.dispatch import receiver
-from .models import Post
 
+from .models import Post, Profile, Comment, Like, Reel, UserProfile
+from .forms import (
+    PostForm, 
+    CommentForm, 
+    RegisterForm, 
+    ProfileImageForm, 
+    LoginForm, 
+    ReelForm
+)
+
+# Home
 def home_view(request):
-    posts = Post.objects.all().order_by('-created_at')  
+    posts = Post.objects.all().order_by('-created_at')
     return render(request, 'home.html', {'posts': posts})
 
-
-
-
+# Registration
 @csrf_exempt
 @csrf_protect
 def register_view(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            form.save()  
+            form.save()
             messages.success(request, 'Registration successful. You can now log in.')
-            return redirect('login')  
+            return redirect('login')
     else:
         form = UserCreationForm()
-    print("DEBUG CSRF TOKEN:", get_token(request))  
+    print("DEBUG CSRF TOKEN:", get_token(request))
     return render(request, 'register.html', {'form': form})
 
+# Feed
 def feed_view(request):
     posts = Post.objects.all().order_by('-created_at')
-    return render(request,'feed.html', {'posts': posts})
+    return render(request, 'feed.html', {'posts': posts})
 
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
-
-
-
+# Profile
 @login_required
 def profile_view(request, username):
     profile = get_object_or_404(Profile, user__username=username)
@@ -90,15 +79,11 @@ def profile_view(request, username):
         'profile_form': profile_form
     })
 
-
-
-
+# Post Detail
 def post_detail_view(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     comments = Comment.objects.filter(post=post).order_by('-created_at')
-    liked = False
-    if request.user.is_authenticated:
-        liked = Like.objects.filter(post=post, user=request.user).exists()
+    liked = request.user.is_authenticated and Like.objects.filter(post=post, user=request.user).exists()
 
     if request.method == 'POST':
         form = CommentForm(request.POST)
@@ -118,9 +103,7 @@ def post_detail_view(request, post_id):
         'liked': liked,
     })
 
-
-
-
+# Upload Post
 @login_required
 def upload_post(request):
     if request.method == 'POST':
@@ -133,83 +116,58 @@ def upload_post(request):
     else:
         form = PostForm()
     return render(request, 'upload_post.html', {'form': form})
-# Create your views here.
 
-
-
+# Like/Unlike a Post
 @login_required
 def toggle_like(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    user = request.user
-
-    like_qs = Like.objects.filter(post=post, user=user)
+    like_qs = Like.objects.filter(post=post, user=request.user)
     if like_qs.exists():
-        # Unlike
         like_qs.delete()
     else:
-        # Like
-        Like.objects.create(post=post, user=user)
-
+        Like.objects.create(post=post, user=request.user)
     return redirect('post_detail', post_id=post.id)
 
+@login_required
+def like_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    if request.user in post.likes.all():
+        post.likes.remove(request.user)
+    else:
+        post.likes.add(request.user)
+    return redirect(request.META.get('HTTP_REFERER', 'home'))
 
-from django.contrib.auth.views import LoginView
-from .forms import LoginForm
-
+# Login
 class CustomLoginView(LoginView):
     template_name = 'login.html'
     authentication_form = LoginForm
     redirect_authenticated_user = True
     success_url = reverse_lazy('feed')
 
-from django.db.models import Q
+# User Search
 def user_search_view(request):
     query = request.GET.get('q', '')
-    users = []
+    users = User.objects.filter(
+        Q(username__icontains=query) |
+        Q(first_name__icontains=query) |
+        Q(last_name__icontains=query)
+    ) if query else []
+    return render(request, 'user_search_results.html', {'query': query, 'users': users})
 
-    if query:
-        users = User.objects.filter(
-            Q(username__icontains=query) |
-            Q(first_name__icontains=query) |
-            Q(last_name__icontains=query)
-        )
-
-    context = {
-        'query': query,
-        'users': users,
-    }
-    return render(request, 'user_search_results.html', context)
-
-@login_required
-def like_post(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-    user = request.user
-
-    if user in post.likes.all():
-        post.likes.remove(user)
-    else:
-        post.likes.add(user)
-
-    return redirect(request.META.get('HTTP_REFERER', 'home'))
-
-
-
-from django.contrib.auth.models import User
-
+# Follow/Unfollow User
 @login_required
 def follow_user(request, username):
     if request.method == 'POST':
         try:
             user_to_follow = User.objects.get(username=username)
-            profile_to_follow = user_to_follow.profile 
+            profile_to_follow = user_to_follow.profile
             current_profile = request.user.profile
 
-            if current_profile in profile_to_follow.followers.all():
-                profile_to_follow.followers.remove(current_profile)
-                is_following = False
-            else:
+            is_following = current_profile not in profile_to_follow.followers.all()
+            if is_following:
                 profile_to_follow.followers.add(current_profile)
-                is_following = True
+            else:
+                profile_to_follow.followers.remove(current_profile)
 
             return JsonResponse({
                 'success': True,
@@ -224,17 +182,14 @@ def follow_user(request, username):
 
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
-
+# Signals
 @receiver(post_save, sender=User)
 def create_profile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance)
 
-
-
-from .forms import ReelForm
-from .models import Reel
-
+# Reels
+@login_required
 def upload_reel(request):
     if request.method == 'POST':
         form = ReelForm(request.POST, request.FILES)
@@ -242,16 +197,10 @@ def upload_reel(request):
             reel = form.save(commit=False)
             reel.user = request.user
             reel.save()
-            return redirect('reels_feed')  
+            return redirect('reels_feed')
     else:
         form = ReelForm()
     return render(request, 'upload_reel.html', {'form': form})
-
-def reels_feed(request):
-    reels = Reel.objects.all().order_by('-created_at')
-    return render(request, 'reels_feed.html', {'reels': reels})
-
-from .models import Reel 
 
 def reels_feed(request):
     reels = Reel.objects.all().order_by('-created_at')
