@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from .models import Post, Comment
 from django.contrib.auth.forms import AuthenticationForm
 from django.views.decorators.csrf import csrf_protect
-# Use this RegisterForm based on UserCreationForm (recommended)
+
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
 
