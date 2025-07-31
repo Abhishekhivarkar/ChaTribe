@@ -135,7 +135,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
  # make sure this path exists in your urls.py
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/login/'
 LOGOUT_REDIRECT_URL = '/login/'
 import sys
 print("LOGIN_REDIRECT_URL =", LOGIN_REDIRECT_URL, file=sys.stderr)

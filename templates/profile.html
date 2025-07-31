@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
 <style>
   :root {
@@ -31,6 +31,9 @@
   .profile-image-container {
     position: relative;
     margin-bottom: 20px;
+    border:1px black solid;
+    border-radius:50%;
+    
   }
   
   .profile-image {
@@ -433,13 +436,22 @@
 .message-btn:hover {
   background: var(--secondary-color);
 }
+#profile_image{
+  height:200px;
+  width:200px;
+  border-radius:50%;%
+}
 
 </style>
 
 <div class="profile-section">
   <div class="profile-header">
     <div class="profile-image-container">
-      <img src="{{ profile.profile_image.url }}" class="profile-image" alt="{{ profile.user.username }}'s profile picture">
+      {% if profile.profile_image %}
+  <img id= "profile_image"src="{{ profile.profile_image.url }}" alt="Profile Picture">
+{% else %}
+  <img id= "profile_image" src="{% static 'images/default_image.jpg' %}" alt="Default Profile Picture">
+{% endif %}
     </div>
     
     {% if user == profile.user %}
