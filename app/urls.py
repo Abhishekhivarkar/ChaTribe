@@ -16,7 +16,7 @@ urlpatterns = [
     path('post/<int:post_id>/like/', views.toggle_like, name='toggle_like'),
     path('like/<int:post_id>/', views.like_post, name='like_post'),
     path('follow/<str:username>/', views.follow_user, name='follow_user'),
-    path('reels/upload/', views.upload_reel, name='upload_reel'),
+    path('reels/upload/', views.upload_reel, name='upload_reel'), 
     path('reels/', views.reels_feed, name='reels_feed'),
 
 
